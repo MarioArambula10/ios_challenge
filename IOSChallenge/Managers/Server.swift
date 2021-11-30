@@ -75,7 +75,7 @@ private extension Server {
     }
     
     func getRandomModelID() -> String {
-        return UUID().uuidString
+        UUID().uuidString
     }
     
     func getRandomCar() -> Car? {
