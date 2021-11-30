@@ -7,7 +7,7 @@
 
 import UIKit
 
-class CarListTableViewCell: GenericTableViewCell<CarListViewModel>, CarListMapperInjected, DatabaseInjected {
+class CarListTableViewCell: GenericTableViewCell<CarListViewModel> {
     
     let carImageView = UIImageView()
     let favoriteIconButton = UIButton(type: .system)
@@ -16,6 +16,7 @@ class CarListTableViewCell: GenericTableViewCell<CarListViewModel>, CarListMappe
     let yearLabel = UILabel()
     let milageLabel = UILabel()
     let vinLabel = UILabel()
+    private let viewModel = ViewModel()
     
     let systemConfig = UIImage.SymbolConfiguration.init(pointSize: 18, weight: .bold)
     
@@ -44,10 +45,14 @@ class CarListTableViewCell: GenericTableViewCell<CarListViewModel>, CarListMappe
     }
     
     @objc func favoriteButtonWasPressed(sender: UIButton) {
-        
-        guard let item = item, let adModel = carListMapper.asAdModelList([item]).first else { return }
-        sender.isSelected.toggle()
-        db.addNewFavorite(adModel, completion: nil)
+        guard let item = item else { return }
+        viewModel.favoriteButtonWasPressed(item: item) { errorString in
+            if let errorString = errorString {
+                //show error
+            } else {
+                sender.isSelected.toggle()
+            }
+        }
     }
     
     func configure() {
@@ -95,54 +100,69 @@ class CarListTableViewCell: GenericTableViewCell<CarListViewModel>, CarListMappe
     }
     
     func setupViews() {
+//        contentView.addSubview(carImageView)
+//        contentView.addSubview(favoriteIconButton)
+//        contentView.addSubview(nameLabel)
+//        contentView.addSubview(priceLabel)
+//        contentView.addSubview(yearLabel)
+//        contentView.addSubview(milageLabel)
+//        contentView.addSubview(vinLabel)
         
-        addSubview(carImageView)
-        addSubview(favoriteIconButton)
-        addSubview(nameLabel)
-        addSubview(priceLabel)
-        addSubview(yearLabel)
-        addSubview(milageLabel)
-        addSubview(vinLabel)
+        let textLabels = UIStackView(arrangedSubviews: [nameLabel, priceLabel, yearLabel, milageLabel, vinLabel])
+        textLabels.axis = .vertical
+        let contentHorizontal = UIStackView(arrangedSubviews: [textLabels])
         
-        carImageView.translatesAutoresizingMaskIntoConstraints = false
-        favoriteIconButton.translatesAutoresizingMaskIntoConstraints = false
-        nameLabel.translatesAutoresizingMaskIntoConstraints = false
-        priceLabel.translatesAutoresizingMaskIntoConstraints = false
-        yearLabel.translatesAutoresizingMaskIntoConstraints = false
-        milageLabel.translatesAutoresizingMaskIntoConstraints = false
-        vinLabel.translatesAutoresizingMaskIntoConstraints = false
         
-        nameLabel.topAnchor.constraint(equalTo: topAnchor, constant: 10).isActive = true
-        nameLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 10).isActive = true
-        nameLabel.trailingAnchor.constraint(equalTo: favoriteIconButton.leadingAnchor, constant: -10).isActive = true
-        nameLabel.heightAnchor.constraint(equalToConstant: 30).isActive = true
+        contentView.addSubview(contentHorizontal)
         
-        favoriteIconButton.topAnchor.constraint(equalTo: nameLabel.topAnchor).isActive = true
-        favoriteIconButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20).isActive = true
-        favoriteIconButton.heightAnchor.constraint(equalTo: nameLabel.heightAnchor).isActive = true
-        favoriteIconButton.widthAnchor.constraint(equalTo: favoriteIconButton.heightAnchor).isActive = true
+        contentHorizontal.axis = .horizontal
+        contentHorizontal.distribution = .fill
+        contentHorizontal.translatesAutoresizingMaskIntoConstraints = false
+        contentHorizontal.leadingAnchor.constraint(equalTo: contentView.leadingAnchor).isActive = true
+        contentHorizontal.trailingAnchor.constraint(equalTo: contentView.trailingAnchor).isActive = true
+        contentHorizontal.topAnchor.constraint(equalTo: contentView.topAnchor).isActive = true
+        contentHorizontal.bottomAnchor.constraint(equalTo: contentView.bottomAnchor).isActive = true
         
-        carImageView.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 10).isActive = true
-        carImageView.leadingAnchor.constraint(equalTo: nameLabel.leadingAnchor).isActive = true
-        carImageView.widthAnchor.constraint(equalTo: widthAnchor, multiplier: 1/3).isActive = true
-        carImageView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -10).isActive = true
         
-        priceLabel.topAnchor.constraint(equalTo: carImageView.topAnchor).isActive = true
-        priceLabel.leadingAnchor.constraint(equalTo: carImageView.trailingAnchor, constant: 10).isActive = true
-        priceLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -10).isActive = true
-        
-        milageLabel.topAnchor.constraint(equalTo: priceLabel.bottomAnchor, constant: 5).isActive = true
-        milageLabel.leadingAnchor.constraint(equalTo: priceLabel.leadingAnchor).isActive = true
-        milageLabel.trailingAnchor.constraint(equalTo: priceLabel.trailingAnchor).isActive = true
-        
-        yearLabel.topAnchor.constraint(equalTo: milageLabel.bottomAnchor, constant: 5).isActive = true
-        yearLabel.leadingAnchor.constraint(equalTo: milageLabel.leadingAnchor).isActive = true
-        yearLabel.trailingAnchor.constraint(equalTo: milageLabel.trailingAnchor).isActive = true
-        
-        vinLabel.topAnchor.constraint(equalTo: yearLabel.bottomAnchor, constant: 5).isActive = true
-        vinLabel.leadingAnchor.constraint(equalTo: yearLabel.leadingAnchor).isActive = true
-        vinLabel.trailingAnchor.constraint(equalTo: yearLabel.trailingAnchor).isActive = true
-        vinLabel.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -10).isActive = true
+//        carImageView.translatesAutoresizingMaskIntoConstraints = false
+//        favoriteIconButton.translatesAutoresizingMaskIntoConstraints = false
+//        nameLabel.translatesAutoresizingMaskIntoConstraints = false
+//        priceLabel.translatesAutoresizingMaskIntoConstraints = false
+//        yearLabel.translatesAutoresizingMaskIntoConstraints = false
+//        milageLabel.translatesAutoresizingMaskIntoConstraints = false
+//        vinLabel.translatesAutoresizingMaskIntoConstraints = false
+//
+//        nameLabel.topAnchor.constraint(equalTo: topAnchor, constant: 10).isActive = true
+//        nameLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 10).isActive = true
+//        nameLabel.trailingAnchor.constraint(equalTo: favoriteIconButton.leadingAnchor, constant: -10).isActive = true
+//        nameLabel.heightAnchor.constraint(equalToConstant: 30).isActive = true
+//
+//        favoriteIconButton.topAnchor.constraint(equalTo: nameLabel.topAnchor).isActive = true
+//        favoriteIconButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20).isActive = true
+//        favoriteIconButton.heightAnchor.constraint(equalTo: nameLabel.heightAnchor).isActive = true
+//        favoriteIconButton.widthAnchor.constraint(equalTo: favoriteIconButton.heightAnchor).isActive = true
+//
+//        carImageView.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 10).isActive = true
+//        carImageView.leadingAnchor.constraint(equalTo: nameLabel.leadingAnchor).isActive = true
+//        carImageView.widthAnchor.constraint(equalTo: widthAnchor, multiplier: 1/3).isActive = true
+//        carImageView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -10).isActive = true
+//
+//        priceLabel.topAnchor.constraint(equalTo: carImageView.topAnchor).isActive = true
+//        priceLabel.leadingAnchor.constraint(equalTo: carImageView.trailingAnchor, constant: 10).isActive = true
+//        priceLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -10).isActive = true
+//
+//        milageLabel.topAnchor.constraint(equalTo: priceLabel.bottomAnchor, constant: 5).isActive = true
+//        milageLabel.leadingAnchor.constraint(equalTo: priceLabel.leadingAnchor).isActive = true
+//        milageLabel.trailingAnchor.constraint(equalTo: priceLabel.trailingAnchor).isActive = true
+//
+//        yearLabel.topAnchor.constraint(equalTo: milageLabel.bottomAnchor, constant: 5).isActive = true
+//        yearLabel.leadingAnchor.constraint(equalTo: milageLabel.leadingAnchor).isActive = true
+//        yearLabel.trailingAnchor.constraint(equalTo: milageLabel.trailingAnchor).isActive = true
+//
+//        vinLabel.topAnchor.constraint(equalTo: yearLabel.bottomAnchor, constant: 5).isActive = true
+//        vinLabel.leadingAnchor.constraint(equalTo: yearLabel.leadingAnchor).isActive = true
+//        vinLabel.trailingAnchor.constraint(equalTo: yearLabel.trailingAnchor).isActive = true
+//        vinLabel.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -10).isActive = true
         
         heightAnchor.constraint(equalToConstant: 160).isActive = true
     }
